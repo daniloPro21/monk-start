@@ -6,7 +6,7 @@ const ONE_GWEI = 1_000_000_000n;
 module.exports = buildModule("LockModule", (m) => {
   const unlockTime = m.getParameter("unlockTime", JAN_1ST_2030);
   const lockedAmount = m.getParameter("lockedAmount", ONE_GWEI);
-  const tokenAddress = m.getParameter("tokenAddress", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+  const tokenAddress = m.getParameter("tokenAddress", "0x2e8f5396F5781A98051B9E9d93a1528714a038D8");
 
   const lock = m.contract("Lock", [unlockTime, tokenAddress], {
     value: lockedAmount,

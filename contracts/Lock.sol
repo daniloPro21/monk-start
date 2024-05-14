@@ -9,7 +9,7 @@ contract Lock {
     uint public unlockTime;
     address payable public owner;
         // Address of the ERC20 token contract
-    address public tokenAddress;
+    ERC20 public token;
 
     // Event to log token transfers
     event TokensTransferred(address indexed from, address indexed to, uint256 amount);
@@ -18,14 +18,14 @@ contract Lock {
     event Withdrawal(uint amount, uint when);
 
 
-    constructor(uint _unlockTime, address _tokenAddress) payable {
+    constructor(uint _unlockTime, address _token) payable {
         require(
             block.timestamp < _unlockTime,
             "Unlock time should be in the future"
         );
 
         unlockTime = _unlockTime;
-        tokenAddress = _tokenAddress;
+        token = ERC20(_token);
         owner = payable(msg.sender);
     }
 
@@ -43,24 +43,21 @@ contract Lock {
 
      // Function to get the contract balance
     function getContractBalance() external view returns (uint256) {
-        return address(this).balance;
+        return token.balanceOf(address(this));
     }
 
     // Function to transfer ERC20 tokens to a user
-    function transferTokens(address _to, uint256 _amount)  public {
-        // Create an instance of the ERC20 token contract
-        ERC20 token = ERC20(tokenAddress);
-        
+    function transferTokens(uint256 _amount, ERC20 mytoken)  public {
         // Get the balance of this contract
-        uint256 contractBalance = token.balanceOf(address(this));
-        
+        uint256 contractBalance = mytoken.balanceOf(msg.sender);
         // Ensure the contract has enough tokens to transfer
         require(contractBalance >= _amount, "Insufficient balance in contract");
 
+        mytoken.approve(address(this), _amount);
         // Transfer tokens from this contract to the recipient
-        token.transfer(_to, _amount);
+        mytoken.transferFrom(msg.sender, address(this), _amount);
 
         // Emit event for the transfer
-        emit TokensTransferred(address(this), _to, _amount);
+        emit TokensTransferred(msg.sender, address(this), _amount);
     }
 }
